@@ -910,8 +910,22 @@ type Lexer struct {
   // possible nex application, it should be configurable, like the 'yyextra'
   // field in Flex.
   l, c int  // line number and character position
+  `)
+
+	if len(EXTRA_TYPE) > 0 {
+		out.WriteString(`
+yyextra ` + EXTRA_TYPE + `
+}
+func NewLexer(in io.Reader, yyextra ` + EXTRA_TYPE + `) *Lexer {
+`)
+	} else {
+		out.WriteString(`
 }
 func NewLexer(in io.Reader) *Lexer {
+`)
+	}
+
+	out.WriteString(`
   type dfa struct {
     acc []bool  // Accepting states.
     f []func(rune) int  // Transitions.
@@ -919,7 +933,15 @@ func NewLexer(in io.Reader) *Lexer {
     nest []dfa
   }
   yylex := new(Lexer)
-  yylex.ch = make(chan intstring)
+  yylex.ch = make(chan intstring)`)
+
+	if len(EXTRA_TYPE) > 0 {
+		out.WriteString(`
+yylex.yyextra = yyextra
+`)
+	}
+
+	out.WriteString(`
   var scan func(in *bufio.Reader, ch chan intstring, family []dfa)
   scan = func(in *bufio.Reader, ch chan intstring, family []dfa) {
     // Index of DFA and length of highest-precedence match so far.
