@@ -751,6 +751,9 @@ func writeNNFun(out *bufio.Writer, root rule) {
 	writeFamily(out, &root, 0)
 	out.WriteString("}")
 }
+
+var yyextraName *string
+
 func process(output io.Writer, input io.Reader) {
 	lineno := 1
 	in := bufio.NewReader(input)
@@ -888,6 +891,7 @@ func process(output io.Writer, input io.Reader) {
 		buf = buf[i+1:]
 	}
 
+	EXTRA_TYPE := fmt.Sprintf("%s", *yyextraName)
 	out.WriteString(`import ("bufio";"io";"strings")
 type intstring struct {
   i int
@@ -1113,6 +1117,7 @@ func createDotFile(filename string) *os.File {
 
 func main() {
 	outFilename := flag.String("o", "", `output file`)
+	yyextraName = flag.String("yyextra", "", "Data type stored in yyextra (use an empty string for no yyextra)")
 	standalone = flag.Bool("s", false, `standalone code; NN_FUN macro substitution, no Lex() method`)
 	customError = flag.Bool("e", false, `custom error func; no Error() method`)
 	autorun = flag.Bool("r", false, `run generated program`)
