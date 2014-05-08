@@ -888,6 +888,7 @@ func process(output io.Writer, input io.Reader) {
 		buf = buf[i+1:]
 	}
 
+	EXTRA_TYPE := "*Context"
 	out.WriteString(`import ("bufio";"io";"strings")
 type intstring struct {
   i int
