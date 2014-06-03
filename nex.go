@@ -751,6 +751,9 @@ func writeNNFun(out *bufio.Writer, root rule) {
 	writeFamily(out, &root, 0)
 	out.WriteString("}")
 }
+
+var yyExtraName *string
+
 func process(output io.Writer, input io.Reader) {
 	lineno := 1
 	in := bufio.NewReader(input)
@@ -888,6 +891,7 @@ func process(output io.Writer, input io.Reader) {
 		buf = buf[i+1:]
 	}
 
+	ExtraType := *yyExtraName
 	out.WriteString(`import ("bufio";"io";"strings")
 type intstring struct {
   i int
@@ -912,11 +916,11 @@ type Lexer struct {
   l, c int  // line number and character position
   `)
 
-	if len(EXTRA_TYPE) > 0 {
+	if len(ExtraType) > 0 {
 		out.WriteString(`
-yyextra ` + EXTRA_TYPE + `
+yyextra ` + ExtraType + `
 }
-func NewLexer(in io.Reader, yyextra ` + EXTRA_TYPE + `) *Lexer {
+func NewLexer(in io.Reader, yyextra ` + ExtraType + `) *Lexer {
 `)
 	} else {
 		out.WriteString(`
@@ -935,7 +939,7 @@ func NewLexer(in io.Reader) *Lexer {
   yylex := new(Lexer)
   yylex.ch = make(chan intstring)`)
 
-	if len(EXTRA_TYPE) > 0 {
+	if len(ExtraType) > 0 {
 		out.WriteString(`
 yylex.yyextra = yyextra
 `)
@@ -1113,6 +1117,7 @@ func createDotFile(filename string) *os.File {
 
 func main() {
 	outFilename := flag.String("o", "", `output file`)
+	yyExtraName = flag.String("yyextra", "", "Data type stored in yyextra (use an empty string for no yyextra)")
 	standalone = flag.Bool("s", false, `standalone code; NN_FUN macro substitution, no Lex() method`)
 	customError = flag.Bool("e", false, `custom error func; no Error() method`)
 	autorun = flag.Bool("r", false, `run generated program`)
